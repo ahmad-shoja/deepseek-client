@@ -1,3 +1,9 @@
+@import url("https://v1.fontapi.ir/css/SFProDisplay");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+}

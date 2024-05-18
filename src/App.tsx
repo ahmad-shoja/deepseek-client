@@ -1,8 +1,15 @@
-function App() {
+import { BrowserRouter } from "react-router-dom";
+import Layout from "./components/layout";
+import Router from "./Router";
 
+function App() {
   return (
     <>
-      <h1 className="text-orange-300">Hellow</h1>
+      <BrowserRouter>
+        <Layout>
+          <Router />
+        </Layout>
+      </BrowserRouter>
     </>
   );
 }
