@@ -2,7 +2,7 @@ import BadgeSelect from "../../components/ui/BadgeSelect";
 import Select from "../../components/ui/Select";
 import TextAria from "../../components/ui/TextAria";
 import { useWriteContext } from "../../providers/WriteProvider";
-import { Format, Length, Tone } from "../../types/Write";
+import { Format, Lang, Length, Tone } from "../../types/Write";
 
 export default function Content() {
   const {
@@ -19,6 +19,7 @@ export default function Content() {
     setOriginalText,
     whatToReply,
     setWhatToReply,
+    setLang,
   } = useWriteContext();
 
   const composeFieldMarkup = (
@@ -94,7 +95,7 @@ export default function Content() {
 
       <Select
         label="Output Language"
-        onSelect={(val) => console.log(val)}
+        onSelect={(val) => setLang(val as Lang)}
         options={[
           { label: "Auto", value: "auto" },
           { label: "English", value: "english" },
