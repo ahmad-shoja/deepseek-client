@@ -1,3 +1,4 @@
+import { token, writeUrl } from "../../constants";
 import { Format, Lang, Length, Tone } from "../../types/Write";
 import { mapMessage, parseChunk } from "./map";
 
@@ -12,12 +13,12 @@ export const ask = async (
   },
 ): Promise<void> => {
   const constructedMessage = mapMessage(message, options);
-  const response = await fetch("https://api.deepseek.com/chat/completions", {
+  const response = await fetch(writeUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${"sk-ca38a341295f4e12b27c18e94d71f222"}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
       messages: [{ content: constructedMessage, role: "user" }],

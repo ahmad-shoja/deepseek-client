@@ -3,11 +3,11 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import { Lang } from "../types/Translate";
 import { ask as askTranslate } from "../adapters/translateAdapter";
+import { useDebounced } from "../hooks/useDebounced";
 
 type PropsTypes = PropsWithChildren;
 
@@ -55,41 +55,25 @@ export default function TranslateProvider({ children }: PropsTypes) {
   const [destLang, setDestLang] = useState<Lang>(defaultValues.destLang);
   const [loading, setLoading] = useState<boolean>(defaultValues.loading);
   const [error, setError] = useState<string>(defaultValues.error);
-
-  const timeout = useRef(0);
-  useEffect(() => {
-    if (!message) return;
-    if (timeout) clearTimeout(timeout.current);
-    timeout.current = setTimeout(async () => {
-      setLoading(true);
-      const res = await askTranslate(message, sourceLang, destLang);
-      setResponse(res);
-      setLoading(false);
-    }, 2000);
-  }, [destLang, message, sourceLang, timeout]);
-
-  const ask = async () => {
-    setLoading(true);
-    askTranslate(message, sourceLang, destLang).then((res) => {
-      setLoading(false);
-      setResponse(res);
-    });
-  };
   const debouncedSetResponse = useDebounced(setResponse, 30);
 
-  const ask = async () => {
+  const ask = () => {
+    if (!message) return;
     setLoading(true);
     let lResponse = "";
-    askCoder(
-      message,
-      (chunk, done) => {
-        lResponse += chunk;
-        debouncedSetResponse(lResponse);
-        setLoading(!done);
-      },
-      { length, format, lang, tone },
-    );
+    askTranslate(message, sourceLang, destLang, (chunk, done) => {
+      lResponse += chunk;
+      debouncedSetResponse(lResponse);
+      setLoading(false);
+    });
   };
+  const debouncedAsk = useDebounced(ask, 1000);
+
+  useEffect(() => {
+    if (!message) return;
+    debouncedAsk(message);
+  }, [message]);
+
   return (
     <TranslateContext.Provider
       value={{
