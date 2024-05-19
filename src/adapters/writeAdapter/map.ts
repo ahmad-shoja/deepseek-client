@@ -10,7 +10,7 @@ export const parseChunk = (chunksString: string): string => {
       if (!chunkString) return "";
       return JSON.parse(chunkString).choices[0].delta.content;
     });
-  return parsedChunk.join(" ");
+  return parsedChunk.join("");
 };
 export const mapCodeResponse = (text: string): Array<ParsedResponse> => {
   const pattern = /(```\w*\n[\s\S]*?\n```)/g;
