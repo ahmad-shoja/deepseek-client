@@ -75,7 +75,21 @@ export default function TranslateProvider({ children }: PropsTypes) {
       setResponse(res);
     });
   };
+  const debouncedSetResponse = useDebounced(setResponse, 30);
 
+  const ask = async () => {
+    setLoading(true);
+    let lResponse = "";
+    askCoder(
+      message,
+      (chunk, done) => {
+        lResponse += chunk;
+        debouncedSetResponse(lResponse);
+        setLoading(!done);
+      },
+      { length, format, lang, tone },
+    );
+  };
   return (
     <TranslateContext.Provider
       value={{

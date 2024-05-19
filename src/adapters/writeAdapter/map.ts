@@ -1,6 +1,17 @@
 import { Length, Format, Tone, Lang } from "../../types/Write";
 import { ParsedResponse } from "./types";
 
+export const parseChunk = (chunksString: string): string => {
+  const parsedChunk = chunksString
+    .substring(6)
+    .replace("\n\ndata: [DONE]", "")
+    .split("\n\ndata: ")
+    .map((chunkString) => {
+      if (!chunkString) return "";
+      return JSON.parse(chunkString).choices[0].delta.content;
+    });
+  return parsedChunk.join(" ");
+};
 export const mapCodeResponse = (text: string): Array<ParsedResponse> => {
   const pattern = /(```\w*\n[\s\S]*?\n```)/g;
   const parts = text.split(pattern);

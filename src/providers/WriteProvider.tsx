@@ -1,7 +1,7 @@
 import { createContext, PropsWithChildren, useContext, useState } from "react";
 import { Mode, Length, Format, Tone, Lang } from "../types/Write";
-import { ParsedResponse } from "../adapters/writeAdapter/types";
 import { ask as askCoder } from "../adapters/writeAdapter";
+import { useDebounced } from "../hooks/useDebounced";
 
 type PropsTypes = PropsWithChildren;
 
@@ -13,7 +13,7 @@ type ContextValueTypes = {
   tone: Tone;
   originalText: string;
   whatToReply: string;
-  response: Array<ParsedResponse>;
+  response: string;
   lang: Lang;
   error: string;
   loading: boolean;
@@ -27,7 +27,7 @@ type ContextSetterTypes = {
   setTone: (tone: Tone) => void;
   setOriginalText: (originalText: string) => void;
   setWhatToReply: (whatToReply: string) => void;
-  setResponse: (response: Array<ParsedResponse>) => void;
+  setResponse: (response: string) => void;
   setLang: (lang: Lang) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string) => void;
@@ -50,7 +50,7 @@ const defaultValues: ContextType = {
   setOriginalText: function (): void {},
   whatToReply: "",
   setWhatToReply: function (): void {},
-  response: [],
+  response: "",
   setResponse: function (): void {},
   lang: "auto",
   setLang: function (): void {},
@@ -74,19 +74,24 @@ export default function WriteProvider({ children }: PropsTypes) {
   const [whatToReply, setWhatToReply] = useState<string>(
     defaultValues.whatToReply,
   );
-  const [response, setResponse] = useState<Array<ParsedResponse>>(
-    defaultValues.response,
-  );
+  const [response, setResponse] = useState<string>(defaultValues.response);
   const [lang, setLang] = useState<Lang>(defaultValues.lang);
   const [loading, setLoading] = useState<boolean>(defaultValues.loading);
   const [error, setError] = useState<string>(defaultValues.error);
+  const debouncedSetResponse = useDebounced(setResponse, 30);
 
   const ask = async () => {
     setLoading(true);
-    askCoder(message, { length, format, lang, tone }).then((res) => {
-      setLoading(false);
-      setResponse(res);
-    });
+    let lResponse = "";
+    askCoder(
+      message,
+      (chunk, done) => {
+        lResponse += chunk;
+        debouncedSetResponse(lResponse);
+        setLoading(!done);
+      },
+      { length, format, lang, tone },
+    );
   };
 
   return (
